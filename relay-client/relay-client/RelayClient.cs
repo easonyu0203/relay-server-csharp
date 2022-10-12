@@ -9,15 +9,15 @@ public class RelayClient
     public event Action SendPingEvent;
     public event Action RecvPingEvent;
 
-    public void StartClient()
+    public void StartClient(string hostName, int port)
     {
         byte[] buffer = new byte[1048576]; // 2MB
 
         try
         {
-            IPHostEntry host = Dns.GetHostEntry("localhost");
+            IPHostEntry host = Dns.GetHostEntry(hostName);
             IPAddress ipAddress = host.AddressList[0];
-            IPEndPoint remoteEP = new IPEndPoint(ipAddress, 3030);
+            IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
             Socket socket = new Socket(ipAddress.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
 
