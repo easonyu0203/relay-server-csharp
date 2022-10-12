@@ -76,7 +76,7 @@ public class RelayClient
                             case "MSG":
                                 Console.WriteLine("[send] msg request");
                                 sendPayload.PayloadType = (Int32)Payload.Type.Msg;
-                                byte[] body = Encoding.ASCII.GetBytes(worlds[1]);
+                                byte[] body = Encoding.ASCII.GetBytes(line.Substring(line.IndexOf(' ') + 1));
                                 sendPayload.BodySize = body.Length;
                                 sendPayload.Body = body;
                                 socket.Send(Payload.Encode(ref sendPayload));
