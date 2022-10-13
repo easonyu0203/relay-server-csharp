@@ -35,8 +35,7 @@ Here is a demo of using my implementation of relay server & client
     [C# Relay Server Demo](https://youtu.be/s8746QzZXvc)
     
 - Flow diagram
-    
-    ![Untitled](c#%20Relay%20Server%20aa2410428ad74730a2e82c6de18af631/Untitled.png)
+    ![alt text](https://github.com/easonyu0203/relay-server-csharp/blob/master/README/FlowDiagram.png?raw=true)
     
 
 # Document
