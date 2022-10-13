@@ -1,8 +1,5 @@
 # c# Relay Server
 
-Duration: October 11, 2022 → October 13, 2022
-Status: complete
-Type: C#
 
 # Introduction
 
