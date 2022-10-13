@@ -1,5 +1,8 @@
 # c# Relay Server
 
+Duration: October 11, 2022 → October 13, 2022
+Status: complete
+Type: C#
 
 # Introduction
 
@@ -22,6 +25,19 @@ I want to make a client-to-client real-time game, and want to use a **relay serv
 5. start another client and run `JOIN 1` to join room with id 1
 6. run `MSG “hello world”` to send “hello world” to the room
 7. you should see “hello world” in all clients exclude sender
+
+# Demo
+
+Here is a demo of using my implementation of relay server & client
+
+- Video
+    
+    [C# Relay Server Demo](https://youtu.be/s8746QzZXvc)
+    
+- Flow diagram
+    
+    ![Untitled](c#%20Relay%20Server%20aa2410428ad74730a2e82c6de18af631/Untitled.png)
+    
 
 # Document
 
