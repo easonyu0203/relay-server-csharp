@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using CommandLine;
-using tcp_client;
+using relay_client;
 
 int result = Parser.Default.ParseArguments<Options>(args).MapResult(
     Main,

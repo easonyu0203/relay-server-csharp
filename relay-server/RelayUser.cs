@@ -1,8 +1,9 @@
 using System.Net.Sockets;
+using relay_server.Payload;
 
 namespace relay_server;
 
-public class User
+public class RelayUser
 {
     private static int _idCounter = 0;
     private static int GetNewId => _idCounter++;
@@ -14,14 +15,14 @@ public class User
     public event Action OnDisconnect;
     public bool Connected => Socket.Connected;
 
-    public User(Socket socket)
+    public RelayUser(Socket socket)
     {
         Id = GetNewId;
         Socket = socket;
         _buffer = new byte[1048576]; // 2MB buffer
     }
 
-    public Payload ReceivePayload()
+    public BasePayload ReceivePayload()
     {
         try
         {
@@ -33,7 +34,7 @@ public class User
                 if (byteSize >= 4)
                 {
                     int lastInt = BitConverter.ToInt32(_buffer, byteSize - 4);
-                    if (lastInt == Payload.END_FLAG)
+                    if (lastInt == BasePayload.END_FLAG)
                         break;
                 }
             }
@@ -45,12 +46,12 @@ public class User
         }
 
 
-        return Payload.Decode(_buffer);
+        return BasePayload.Decode(_buffer);
     }
 
-    public void SendPayload(Payload payload)
+    public void SendPayload(BasePayload basePayload)
     {
-        Socket.Send(Payload.Encode(ref payload));
+        Socket.Send(BasePayload.Encode(basePayload));
     }
 
     public void Disconnect()

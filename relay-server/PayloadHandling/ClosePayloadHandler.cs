@@ -1,26 +1,22 @@
 using System.Net.Sockets;
+using relay_server.Payload;
 
 namespace relay_server.PayloadHandling;
 
 public class ClosePayloadHandler : IPayloadHandler
 {
-    public bool CanHandleType(Payload.Type type)
+    public bool CanHandleType(BasePayload.Type type)
     {
-        return type == Payload.Type.Close;
+        return type == BasePayload.Type.Close;
     }
 
-    public void HandlePayload(Payload recvPayload, User user)
+    public void HandlePayload(BasePayload recvBasePayload, RelayUser relayUser)
     {
         Console.WriteLine("[recv] request close");
-        // create close payload
-        Payload sendPayload = new Payload();
-        sendPayload.PayloadType = (Int32)Payload.Type.Close;
-        sendPayload.BodySize = 0;
-        sendPayload.Body = new byte[] { };
         // send close payload to client
-        user.SendPayload(sendPayload);
+        relayUser.SendPayload(new ClosePayload());
         // close client handler
-        user.Disconnect();
+        relayUser.Disconnect();
         Console.WriteLine("[send] close");
     }
 }

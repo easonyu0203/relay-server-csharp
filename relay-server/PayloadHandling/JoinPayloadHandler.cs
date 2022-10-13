@@ -1,31 +1,27 @@
+using relay_server.Payload;
+
 namespace relay_server.PayloadHandling;
 
 public class JoinPayloadHandler : IPayloadHandler
 {
-    public bool CanHandleType(Payload.Type type)
+    public bool CanHandleType(BasePayload.Type type)
     {
-        return type == Payload.Type.Join;
+        return type == BasePayload.Type.Join;
     }
 
-    public void HandlePayload(Payload recvPayload, User user)
+    public void HandlePayload(BasePayload recvBasePayload, RelayUser relayUser)
     {
         Console.WriteLine("[recv] Join request");
-        int roomId = BitConverter.ToInt32(recvPayload.Body);
+        int roomId = BitConverter.ToInt32(recvBasePayload.Body);
         if (Hotel.Instance == null)
         {
             Console.WriteLine("Hotel singleton not found");
         }
 
         Console.WriteLine($"add to room: {roomId}");
-        Hotel.Instance?.JoinRoom(roomId, user);
+        Hotel.Instance?.JoinRoom(roomId, relayUser);
         // send success
-        Payload sendPayload = new Payload()
-        {
-            PayloadType = (Int32)Payload.Type.Status,
-            BodySize = 4,
-            Body = BitConverter.GetBytes(200)
-        };
-        user.SendPayload(sendPayload);
+        relayUser.SendPayload(new StatusPayload(200));
         Console.WriteLine("[send] status success");
     }
 }

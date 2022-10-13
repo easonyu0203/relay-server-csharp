@@ -1,24 +1,20 @@
 using System.Net.Sockets;
+using relay_server.Payload;
 
 namespace relay_server.PayloadHandling;
 
 public class PingPayloadHandler : IPayloadHandler
 {
-    public bool CanHandleType(Payload.Type type)
+    public bool CanHandleType(BasePayload.Type type)
     {
-        return type == Payload.Type.Ping;
+        return type == BasePayload.Type.Ping;
     }
 
-    public void HandlePayload(Payload recvPayload, User user)
+    public void HandlePayload(BasePayload recvBasePayload, RelayUser relayUser)
     {
         Console.WriteLine("[recv] Ping");
-        // create ping payload
-        Payload sendPayload = new Payload();
-        sendPayload.PayloadType = (Int32)Payload.Type.Ping; 
-        sendPayload.BodySize = 0;
-        sendPayload.Body = new byte[] { };
         // send ping payload to client
-        user.SendPayload(sendPayload);
+        relayUser.SendPayload(new PingPayload());
         Console.WriteLine("[send] ping");
     }
 }

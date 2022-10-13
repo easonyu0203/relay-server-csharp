@@ -1,18 +1,20 @@
+using relay_server.Payload;
+
 namespace relay_server.PayloadHandling;
 
 public class MsgPayloadHandler: IPayloadHandler
 {
-    public bool CanHandleType(Payload.Type type)
+    public bool CanHandleType(BasePayload.Type type)
     {
-        return type == Payload.Type.Msg;
+        return type == BasePayload.Type.Msg;
     }
 
-    public void HandlePayload(Payload recvPayload, User user)
+    public void HandlePayload(BasePayload recvBasePayload, RelayUser relayUser)
     {
         Console.WriteLine("[recv] msg => relaying");
-        foreach (Room room in Hotel.Instance.UserRooms[user])
+        foreach (Room room in Hotel.Instance.UserRooms[relayUser])
         {
-            room.RelayPayload(recvPayload, user);
+            room.RelayPayload(recvBasePayload, relayUser);
         }
     }
 }

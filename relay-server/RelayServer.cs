@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using relay_server.Payload;
 using relay_server.PayloadHandling;
 
 namespace relay_server;
@@ -48,20 +49,20 @@ public class RelayServer
         {
             Console.WriteLine("accept client connection");
             // Create User
-            User user = new User(clientHandler);
+            RelayUser relayUser = new RelayUser(clientHandler);
             // set up handler
             IPayloadHandler[] payloadHandlers = GetPayloadHandlers;
 
             // client server communication
-            while (user.Connected)
+            while (relayUser.Connected)
             {
-                Payload recvPayload = user.ReceivePayload();
+                BasePayload recvBasePayload = relayUser.ReceivePayload();
                 // do corresponding actions
                 foreach (IPayloadHandler payloadHandler in payloadHandlers)
                 {
-                    if (payloadHandler.CanHandleType((Payload.Type)recvPayload.PayloadType))
+                    if (payloadHandler.CanHandleType((BasePayload.Type)recvBasePayload.PayloadType))
                     {
-                        payloadHandler.HandlePayload(recvPayload, user);
+                        payloadHandler.HandlePayload(recvBasePayload, relayUser);
                         break;
                     }
                 }

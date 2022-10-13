@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace tcp_client;
+namespace relay_client;
 
 public class RelayClient
 {
@@ -30,7 +30,7 @@ public class RelayClient
                 {
                     while (socket.Connected)
                     {
-                        Payload sendPayload = new Payload();
+                        BasePayload sendPayload = new BasePayload();
                         // do user command
                         Console.Write("\n>> ");
                         string? line = Console.ReadLine();
@@ -41,45 +41,30 @@ public class RelayClient
                         {
                             case "PING":
                                 Console.WriteLine("[send] Ping request");
-                                sendPayload.PayloadType = (Int32)Payload.Type.Ping;
-                                sendPayload.BodySize = 0;
-                                sendPayload.Body = new byte[] { };
                                 // delegate
                                 SendPingEvent?.Invoke();
                                 // send 
-                                socket.Send(Payload.Encode(ref sendPayload));
+                                socket.Send(BasePayload.Encode(new PingPayload()));
                                 break;
                             case "CLOSE":
                                 Console.WriteLine("[send] close request");
-                                sendPayload.PayloadType = (Int32)Payload.Type.Close;
-                                sendPayload.BodySize = 0;
-                                sendPayload.Body = new byte[] { };
                                 // send 
-                                socket.Send(Payload.Encode(ref sendPayload));
+                                socket.Send(BasePayload.Encode(new ClosePayload()));
                                 break;
                             case "JOIN":
                                 Console.WriteLine("[send] join request");
                                 int roomId = int.Parse(worlds[1]);
-                                sendPayload.PayloadType = (Int32)Payload.Type.Join;
-                                sendPayload.BodySize = 4;
-                                sendPayload.Body = BitConverter.GetBytes(roomId);
-                                socket.Send(Payload.Encode(ref sendPayload));
+                                socket.Send(BasePayload.Encode(new JoinPayload(roomId)));
                                 break;
                             case "LEAVE":
                                 Console.WriteLine("[send] leave request");
                                 roomId = int.Parse(worlds[1]);
-                                sendPayload.PayloadType = (Int32)Payload.Type.Leave;
-                                sendPayload.BodySize = 4;
-                                sendPayload.Body = BitConverter.GetBytes(roomId);
-                                socket.Send(Payload.Encode(ref sendPayload));
+                                socket.Send(BasePayload.Encode(new LeavePayload(roomId)));
                                 break;
                             case "MSG":
                                 Console.WriteLine("[send] msg request");
-                                sendPayload.PayloadType = (Int32)Payload.Type.Msg;
                                 byte[] body = Encoding.ASCII.GetBytes(line.Substring(line.IndexOf(' ') + 1));
-                                sendPayload.BodySize = body.Length;
-                                sendPayload.Body = body;
-                                socket.Send(Payload.Encode(ref sendPayload));
+                                socket.Send(BasePayload.Encode(new MsgPayload(body)));
                                 break;
                             default:
                                 Console.WriteLine("unknown command");
@@ -91,32 +76,32 @@ public class RelayClient
                 {
                     while (socket.Connected)
                     {
-                        Payload recvPayload = new Payload();
+                        BasePayload recvPayload = new BasePayload();
                         // receive
                         recvPayload = ReceivePayload(socket, ref buffer);
                         Console.WriteLine("\n=========");
                         // handle received payload
-                        switch ((Payload.Type)recvPayload.PayloadType)
+                        switch ((BasePayload.Type)recvPayload.PayloadType)
                         {
-                            case Payload.Type.Ping:
+                            case BasePayload.Type.Ping:
                                 Console.WriteLine("[recv] ping");
                                 RecvPingEvent?.Invoke();
                                 break;
-                            case Payload.Type.Close:
+                            case BasePayload.Type.Close:
                                 Console.WriteLine("[recv] close");
                                 socket.Shutdown(SocketShutdown.Both);
                                 socket.Close();
                                 break;
-                            case Payload.Type.Status:
+                            case BasePayload.Type.Status:
                                 Console.WriteLine("[recv] status");
                                 Console.WriteLine($"get status code: {BitConverter.ToInt32(recvPayload.Body)}");
                                 break;
-                            case Payload.Type.Msg:
+                            case BasePayload.Type.Msg:
                                 Console.WriteLine("[recv] msg");
                                 Console.WriteLine(Encoding.ASCII.GetString(recvPayload.Body));
                                 break;
                             default:
-                                Console.WriteLine($"not support payload type: {(Payload.Type)recvPayload.PayloadType}");
+                                Console.WriteLine($"not support payload type: {(BasePayload.Type)recvPayload.PayloadType}");
                                 break;
                         }
                         Console.WriteLine("\n=========");
@@ -145,7 +130,7 @@ public class RelayClient
         }
     }
 
-    Payload ReceivePayload(Socket socket, ref byte[] lBuffer)
+    BasePayload ReceivePayload(Socket socket, ref byte[] lBuffer)
     {
         int byteSize = 0;
         while (true)
@@ -155,11 +140,11 @@ public class RelayClient
             if (byteSize >= 4)
             {
                 int lastInt = BitConverter.ToInt32(lBuffer, byteSize - 4);
-                if (lastInt == Payload.END_FLAG)
+                if (lastInt == BasePayload.END_FLAG)
                     break;
             }
         }
 
-        return Payload.Decode(lBuffer);
+        return BasePayload.Decode(lBuffer);
     }
 }

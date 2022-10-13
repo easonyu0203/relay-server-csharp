@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net.Sockets;
 
-namespace tcp_client;
+namespace relay_client;
 
 public static class DebugUlti
 {

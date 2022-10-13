@@ -1,4 +1,4 @@
-namespace tcp_client;
+namespace relay_client;
 using CommandLine;
 
 public class Options

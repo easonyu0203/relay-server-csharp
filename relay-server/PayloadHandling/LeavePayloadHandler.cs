@@ -1,31 +1,28 @@
+using relay_server.Payload;
+
 namespace relay_server.PayloadHandling;
 
 public class LeavePayloadHandler : IPayloadHandler
 {
-    public bool CanHandleType(Payload.Type type)
+    public bool CanHandleType(BasePayload.Type type)
     {
-        return type == Payload.Type.Leave;
+        return type == BasePayload.Type.Leave;
     }
 
-    public void HandlePayload(Payload recvPayload, User user)
+    public void HandlePayload(BasePayload recvBasePayload, RelayUser relayUser)
     {
         Console.WriteLine("[recv] Leave request");
-        int roomId = BitConverter.ToInt32(recvPayload.Body);
+        int roomId = BitConverter.ToInt32(recvBasePayload.Body);
         if (Hotel.Instance == null)
         {
             Console.WriteLine("Hotel singleton not found");
         }
 
         Console.WriteLine($"leave room: {roomId}");
-        bool success = Hotel.Instance != null && Hotel.Instance.LeaveRoom(roomId, user);
+        bool success = Hotel.Instance != null && Hotel.Instance.LeaveRoom(roomId, relayUser);
         // send success
-        Payload sendPayload = new Payload()
-        {
-            PayloadType = (Int32)Payload.Type.Status,
-            BodySize = 4,
-            Body = BitConverter.GetBytes(success?200:404)
-        };
-        user.SendPayload(sendPayload);
+        BasePayload sendBasePayload = new StatusPayload(success ? 200 : 404);
+        relayUser.SendPayload(sendBasePayload);
         
         Console.WriteLine(success?"[send] status success": "[send] status fail");
     }

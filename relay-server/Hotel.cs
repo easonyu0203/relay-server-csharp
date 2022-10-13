@@ -1,62 +1,63 @@
 using System.Net.Sockets;
+using relay_server.Payload;
 
 namespace relay_server;
 
 public class Hotel : Singleton<Hotel>
 {
     public Dictionary<Int32, Room> Rooms = new Dictionary<int, Room>();
-    public Dictionary<User, HashSet<Room>> UserRooms = new Dictionary<User, HashSet<Room>>();
+    public Dictionary<RelayUser, HashSet<Room>> UserRooms = new Dictionary<RelayUser, HashSet<Room>>();
 
-    public void JoinRoom(int roomId, User user)
+    public void JoinRoom(int roomId, RelayUser relayUser)
     {
         if (Rooms.ContainsKey(roomId) == false)
         {
             Rooms.Add(roomId, new Room());
         }
 
-        if (UserRooms.ContainsKey(user) == false)
+        if (UserRooms.ContainsKey(relayUser) == false)
         {
-            UserRooms.Add(user, new HashSet<Room>());
+            UserRooms.Add(relayUser, new HashSet<Room>());
         }
 
-        Rooms[roomId].AddUser(user);
-        UserRooms[user].Add(Rooms[roomId]);
-        user.OnDisconnect += () =>
+        Rooms[roomId].AddUser(relayUser);
+        UserRooms[relayUser].Add(Rooms[roomId]);
+        relayUser.OnDisconnect += () =>
         {
-            Rooms[roomId].RemoveUser(user);
-            UserRooms.Remove(user);
+            Rooms[roomId].RemoveUser(relayUser);
+            UserRooms.Remove(relayUser);
         };
     }
 
-    public bool LeaveRoom(int roomId, User user)
+    public bool LeaveRoom(int roomId, RelayUser relayUser)
     {
-        if(!UserRooms.ContainsKey(user)) return false;
-        Rooms[roomId].RemoveUser(user);
-        UserRooms[user].Remove(Rooms[roomId]);
+        if(!UserRooms.ContainsKey(relayUser)) return false;
+        Rooms[roomId].RemoveUser(relayUser);
+        UserRooms[relayUser].Remove(Rooms[roomId]);
         return true;
     }
 }
 
 public class Room
 {
-    private HashSet<User> _users = new HashSet<User>();
+    private HashSet<RelayUser> _users = new HashSet<RelayUser>();
 
-    public void AddUser(User user)
+    public void AddUser(RelayUser relayUser)
     {
-        _users.Add(user);
+        _users.Add(relayUser);
     }
 
-    public void RemoveUser(User user)
+    public void RemoveUser(RelayUser relayUser)
     {
-        _users.Remove(user);
+        _users.Remove(relayUser);
     }
 
-    public void RelayPayload(Payload relayPayload, User user)
+    public void RelayPayload(BasePayload relayBasePayload, RelayUser relayUser)
     {
-        foreach (User other in _users)
+        foreach (RelayUser other in _users)
         {
-            if(user == other) continue;
-            other.SendPayload(relayPayload);
+            if(relayUser == other) continue;
+            other.SendPayload(relayBasePayload);
         }
     }
 }
