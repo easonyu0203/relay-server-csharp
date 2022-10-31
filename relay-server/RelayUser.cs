@@ -12,7 +12,7 @@ public class RelayUser
     private Socket Socket { get; }
     private byte[] _buffer;
 
-    public event Action OnDisconnect;
+    public event Action? OnDisconnect;
     public bool Connected => Socket.Connected;
 
     public RelayUser(Socket socket)
@@ -20,6 +20,7 @@ public class RelayUser
         Id = GetNewId;
         Socket = socket;
         _buffer = new byte[1048576]; // 2MB buffer
+        Console.WriteLine($"client {Id} connected");
     }
 
     public BasePayload ReceivePayload()
@@ -39,10 +40,10 @@ public class RelayUser
                 }
             }
         }
-        catch (Exception e)
+        catch (SocketException)
         {
-            Console.WriteLine(e);
-            throw;
+            Console.WriteLine("client unexpected disconnect");
+            Disconnect();
         }
 
 
@@ -51,11 +52,21 @@ public class RelayUser
 
     public void SendPayload(BasePayload basePayload)
     {
-        Socket.Send(BasePayload.Encode(basePayload));
+        try
+        {
+            Socket.Send(BasePayload.Encode(basePayload));
+        }
+        catch (SocketException)
+        {
+            Console.WriteLine("client unexpected disconnect");
+            Disconnect();
+        }
     }
 
     public void Disconnect()
     {
+        if (!Connected) return;
+        Console.WriteLine($"client {Id} disconnect");
         OnDisconnect?.Invoke();
         Socket.Shutdown(SocketShutdown.Both);
         Socket.Close();

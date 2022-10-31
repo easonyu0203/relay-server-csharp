@@ -12,7 +12,7 @@ public class MsgPayloadHandler: IPayloadHandler
     public void HandlePayload(BasePayload recvBasePayload, RelayUser relayUser)
     {
         Console.WriteLine("[recv] msg => relaying");
-        foreach (Room room in Hotel.Instance.UserRooms[relayUser])
+        foreach (Room room in Hotel.Instance!.UserRooms[relayUser])
         {
             room.RelayPayload(recvBasePayload, relayUser);
         }

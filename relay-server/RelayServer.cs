@@ -67,8 +67,8 @@ public class RelayServer
                     }
                 }
             }
-
-            Console.WriteLine("client connection end");
+            // close connection
+            relayUser.Disconnect();
         }
         catch (Exception e)
         {
